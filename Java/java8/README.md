@@ -37,12 +37,13 @@ public class Start  {
 > - 注意方法引用是一个Lambda表达式，其中方法引用的操作符是双冒号"::"
 
 #### 引用形式
-| 类型 | 示例 |   
--|-|-
-| 引用静态方法	 | ContainingClass::staticMethodName |
-| 引用某个对象的实例方法	 |containingObject::instanceMethodName |
-| 引用某个类型的任意对象的实例方法 | ContainingType::methodName |
-| 引用构造方法	| ClassName::new
+
+ 类型 | 示例    
+ ---- | ---- 
+ 引用静态方法	 | ContainingClass::staticMethodName 
+ 引用某个对象的实例方法	 |containingObject::instanceMethodName 
+ 引用某个类型的任意对象的实例方法 | ContainingType::methodName 
+ 引用构造方法	| ClassName::new
 
 - 示例1.引用静态方法
 ```java
