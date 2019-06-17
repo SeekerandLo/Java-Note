@@ -25,3 +25,5 @@ List<Location> locations = mongoTemplate.find(query, Location.class);
                   coordinates : [ <longitude> , <latitude> ]} ,
            $maxDistance : <distance in meters>
 } } } ) 
+
+#### push-> 直接修改数组的方法
