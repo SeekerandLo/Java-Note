@@ -1,5 +1,3 @@
-## 注解
-
 ## 注册 Bean
 1. [四大注解](#声明bean)+[包扫描](#组件扫描-@ComponentScan)
     - [组件扫描过滤规则](#过滤规则-FilterType(Enum))
@@ -9,6 +7,10 @@
 
 5. [@Scope-控制作用域](#设置组件作用域-@Scope)
 6. [@Condition-按照条件注册Bean](#按照条件注册Bean-@Condition)
+
+7. [@Value-Bean赋值](#Bean赋值-@Value)
+
+8. [@PropertySource-读取配置文件](#读取配置文件-@PropertySource)
 
 ## 生命周期
 1. [@Bean设置initMethod和destroyMethod](#@Bean)
@@ -30,7 +32,9 @@
         - 单实例的Bean会在容器关闭的时候销毁
         - 多实例的自己管理
 
+
 ### 声明bean
+
 - @Compent   
 - @Service
 - @Controller
@@ -421,48 +425,3 @@
         @PropertySource(value = {"classpath:/per.properties"})
     })
     ```
-
-### 自动装配 @AutoWired
-- 原理：相当于使用 ApplicationContext.getBean(*.class);
-
-    1. 默认优先使用 applicationContext.getBean(Bean.class)
-    
-    2. 如果找到多个相同类型的组件，再将属性的名称作为id在容器中查找 applicationContext.getBean("BeanName")
-
-    3. 或者使用 **@Qualifier** 指定装配的组件
-
-    4. 当时有自动装配时应保证能找到此组件，否则会报错。或者使用 @AutoWired 的 `required` 属性，设置为 `false`，可以不必须加载 Bean
-
-    5. @Primary 
-
-
-- **@Qualifier**
-    - 与 @AutoWired 配合使用，当环境中存在多个相同类型的组件时，使用 @Qualifier 指定要加载的
-
-- **@Primary** 
-    
-    - 自动装配时先装配该注解标注的组件
-    
-    - 一般不与 **@Qualifier** 一起使用
-
-- 加载优先级
-
-    - 当 @Configuration 标注的配置类下与 @ComponentScan 扫描的类中有相同类型的 Bean，**先加载配置类中的** 
-
-
-### 自动装配 @Resource
-- JSR250 规范(Java 规范)中的
-
-- 与 @AutoWired 一样实现自动装配功能，默认是安装属性名称装配的
-    ```java
-    // 加载的是名称为 testDao2 的组件
-    @Resource(name = "testDao2")
-    TestDao testDao;
-    ```
-
-- 不支持 @Primay 和 @Qualifier 一起使用
-
-### 自动装配 @Inject
-- JSR330 规范(Java 规范)中的
-
-- 与 @AutoWired 功能一样，没有 required 属性
