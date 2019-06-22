@@ -1,11 +1,17 @@
 ## 注册 Bean
 1. [四大注解](#声明bean)+[包扫描](#组件扫描-@ComponentScan)
+
     - [组件扫描过滤规则](#过滤规则-FilterType(Enum))
+    - [包扫描时加载那个函数创建组件]()
+
 2. [@Bean](#Bean)
+
 3. [@Import](#导入组件-@Import)
+
 4. [FactoryBean](#FactoryBean)
 
 5. [@Scope-控制作用域](#设置组件作用域-@Scope)
+
 6. [@Condition-按照条件注册Bean](#按照条件注册Bean-@Condition)
 
 7. [@Value-Bean赋值](#Bean赋值-@Value)
@@ -39,6 +45,8 @@
 - @Service
 - @Controller
 - @Repository
+
+### 
 
 
 ### 设置组件作用域 @Scope 
@@ -105,6 +113,10 @@
     @ComponentScan(value = "com.liy.spring", excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = {Controller.class, Service.class})})
     ```
+
+- 包扫描时加载那个函数创建组件
+    - 当 Bean 的无参构造函数和有参构造函数同时存在时，优先加载无参构造函数
+
 #### [👉回到顶部](#注册-Bean)
 
 ### 过滤规则 FilterType(Enum)
