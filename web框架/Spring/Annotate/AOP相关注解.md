@@ -1,5 +1,7 @@
 ## AOP 相关注解
 
+0. [开启AOP](#@EnableAspectJAutoProxy)
+
 1. [@PointCut]()
 
 2. [@Before]()
@@ -12,6 +14,16 @@
 
 6. [@Around]()
 
+### @EnableAspectJAutoProxy
+
+- 开启基于注解的面向切面功能
+
+- 原理介绍
+    - 该注解中使用了 `@Import(AspectJAutoProxyRegistrar.class)` 引入组件，该组件实现了自定义 Bean 的功能，自定义个一个 Bean ，internalAutoProxyCreator = `AnnotationAwareAspectJAutoProxyCreator`，给容器中注册一个 `AnnotationAwareAspectJAutoProxyCreator` ，自动代理创建器
+
+    - [AnnotationAwareAspectJAutoProxyCreator](#AnnotationAwareAspectJAutoProxyCreator)
+
+### AnnotationAwareAspectJAutoProxyCreator
 
 ### @PointCut
 - 切点方法
@@ -73,13 +85,3 @@
 ### @Around
 
 
-### @EnableAspectJAutoProxy
-
-- 开启基于注解的面向切面功能
-
-- 原理介绍
-    - 该注解中使用了 `@Import(AspectJAutoProxyRegistrar.class)` 引入组件，该组件实现了自定义 Bean 的功能，自定义个一个 Bean ，internalAutoProxyCreator = `AnnotationAwareAspectJAutoProxyCreator`，给容器中注册一个 `AnnotationAwareAspectJAutoProxyCreator` ，自动代理创建器
-
-    - [AnnotationAwareAspectJAutoProxyCreator](#AnnotationAwareAspectJAutoProxyCreator)
-
-### AnnotationAwareAspectJAutoProxyCreator

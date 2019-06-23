@@ -1,5 +1,0 @@
-## Spring 中的 Processer
-Bean 的赋值，注入组件，@Autowried，生命周期注解功能，@Async...
-
-
-### Auto
