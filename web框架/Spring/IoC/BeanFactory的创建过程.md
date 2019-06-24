@@ -2,6 +2,12 @@
 
 1. 在 BeanFactory 的创建过程中如何处理几种 BeanPostProcessor?
 
+    1. [applyMergedBeanDefinitionPostProcessors](#applyMergedBeanDefinitionPostProcessors)
+
+    2. []()
+
+
+
 2. 容器的概念，BeanFactory，ApplicationContext
 
 3. 有一些类的方法是为子类准备的，哪些是？
@@ -11,6 +17,7 @@
     2. [postProcessBeanFactory](#开放子类对BeanFactory的修改)
 
     3. [onRefresh()](#初始化特定上下文子类中的其他特殊-Bean)
+
 
 ## 将 BeanFactory 的创建过程分为以下几个部分
 
@@ -319,3 +326,264 @@
     ```  
 
 ### 完成 BeanFactory 的初始化
+&emsp;&emsp;调用 finishBeanFactoryInitialization(beanFactory) 实例化剩下的不是懒加载的单实例 Bean
+
+- **为上下文初始化 ConversionService**
+    ```java
+    // Initialize conversion service for this context.
+    if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
+            beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
+        beanFactory.setConversionService(
+                beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
+    }
+    ```
+
+- **如果之前没有注册 Bean 的后置处理器，则注册一个默认的值解析器**
+    **(例如 PropertyPlaceholderConfigurer)：**
+    **此时主要用于注释中值的解析**
+    ```java
+    // Register a default embedded value resolver if no bean post-processor
+    // (such as a PropertyPlaceholderConfigurer bean) registered any before:
+    // at this point, primarily for resolution in annotation attribute values.
+    if (!beanFactory.hasEmbeddedValueResolver()) {
+        beanFactory.addEmbeddedValueResolver(strVal -> getEnvironment().resolvePlaceholders(strVal));
+    }   
+    ```
+
+- **尽早初始化 Loadtimeweaveraware Bean 以允许尽早注册其转换器**
+    ```java
+    // Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
+    String[] weaverAwareNames = beanFactory.getBeanNamesForType(LoadTimeWeaverAware.class, false, false);
+    for (String weaverAwareName : weaverAwareNames) {
+        getBean(weaverAwareName);
+    }
+    ```
+
+- **停止使用暂时的类加载器进行类型匹配**
+    ```java
+    // Stop using the temporary ClassLoader for type matching.
+    beanFactory.setTempClassLoader(null);
+    ```
+
+- **允许缓存所有的 Bean 定义元数据，不需进一步更改**
+    ```java
+    // Allow for caching all bean definition metadata, not expecting further changes.
+    beanFactory.freezeConfiguration();
+    ```
+
+- **beanFactory.[preInstantiateSingletons](#preInstantiateSingletons)()**
+
+    **实例化所有的不是懒加载的单实例的 Bean**
+
+#### preInstantiateSingletons
+&emsp;&emsp;确保所有的不是懒加载的单实例的 Bean 被实例化，也考虑 **[FactoryBean]()**，如果需要，通常在 BeanFactory 设置结束后调用此方法，如果有单实例 Bean 不能被创建则抛出 BeansException。  
+```java
+/**
+ * Ensure that all non-lazy-init singletons are instantiated, also considering
+ * {@link org.springframework.beans.factory.FactoryBean FactoryBeans}.
+ * Typically invoked at the end of factory setup, if desired.
+ * @throws BeansException if one of the singleton beans could not be created.
+ * Note: This may have left the factory with some beans already initialized!
+ * Call {@link #destroySingletons()} for full cleanup in this case.
+ * @see #destroySingletons()
+ */
+void preInstantiateSingletons() throws BeansException;
+```
+
+- **迭代一个副本以允许 init 方法，该方法反过来注册成新的 Bean 定义**  
+    **虽然这可能不是一个常规工厂引导的一部分，但它在其他方法是正常的**
+    ```java
+    // Iterate over a copy to allow for init methods which in turn register new bean definitions.
+    // While this may not be part of the regular factory bootstrap, it does otherwise work fine.
+    List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
+    ```
+
+- **触发所有不是懒加载的单实例 Bean 的初始化**
+
+    **遍历 beanNames，开始初始化 Bean**
+
+    - 判断是否是 FactoryBean，FactoryBean 与普通 Bean 的初始化稍有不同
+
+    - [ ] FactoryBean 的创建
+
+    - **[getBean(beanName)](#getBean)** 普通 Bean 的创建 
+
+    **遍历 beanNames，获取单实例 Bean**
+
+- **[返回上级方法](#完成-BeanFactory-的初始化)**
+
+#### getBean
+&emsp;&emsp;调用的 **[doGetBean](#doGetBean)** 方法
+```java
+@Override
+public Object getBean(String name) throws BeansException {
+    return doGetBean(name, null, null, false);
+}
+```
+- **[返回上级方法](#preInstantiateSingletons)**
+
+#### doGetBean
+&emsp;&emsp;返回可以共享的或独立的一个实例，或者一个特殊的 Bean
+- **Object sharedInstance = [getSingleton](#getSingleton)(beanName)**  
+    
+    **期望在缓存中获取单实例 Bean**
+    ```java
+    // Eagerly check singleton cache for manually registered singletons.
+	Object sharedInstance = getSingleton(beanName);
+    ```
+
+- **如果能获得到 sharedInstance**
+
+    **bean = [getObjectForBeanInstance](#getObjectForBeanInstance)(sharedInstance, name, beanName, null)**
+
+    - [ ] 其他操作
+
+    **【返回 Bean】**  
+
+- **如果不能获得到 sharedInstance**
+
+    - **如果已经创建了 Bean 实例，循环引用是不可想象的**
+        ```java
+        // Fail if we're already creating this bean instance:
+        // We're assumably within a circular reference.
+        if (isPrototypeCurrentlyInCreation(beanName)) {
+            throw new BeanCurrentlyInCreationException(beanName);
+        }
+        ```
+    - **[markBeanAsCreated(beanName)]()**
+
+        **将 Bean 标记为已经创建了**
+
+    - **获取 Bean 的依赖，如果有依赖先获取依赖 Bean**
+
+    - **sharedInstance = getSingleton(beanName, () -> {**  
+      &emsp;&emsp;**try {**  
+      &emsp;&emsp;&emsp;&emsp;**return [createBean](#createBean)(beanName, mbd, args);**  
+      &emsp;&emsp;**}**  
+      &emsp;&emsp;**catch (BeansException ex) {**  
+      &emsp;&emsp;&emsp;&emsp;**destroySingleton(beanName);**    
+      &emsp;&emsp;&emsp;&emsp;**throw ex;**   
+      &emsp;&emsp;**}**       
+      **});**  
+      **bean = [getObjectForBeanInstance](#getObjectForBeanInstance)(sharedInstance, name,   beanName, mbd)**
+    - 
+
+- ****
+
+
+
+#### getSingleton
+&emsp;&emsp;返回以给定的名称注册的单实例 Bean。检查 **已经实例化** 的单实例 Bean，也允许当前创建的单实例 Bean 的引用(解析循环引用)
+
+- **Object singletonObject = this.singletonObjects.get(beanName)**
+
+    **从当前缓存中获取 Bean，如果不为 null，直接返回**
+
+- **如果 singletonObject 并且不在正在创建中**
+
+    ```java
+    if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+        synchronized (this.singletonObjects) {
+            singletonObject = this.earlySingletonObjects.get(beanName);
+            if (singletonObject == null && allowEarlyReference) {
+                ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+                if (singletonFactory != null) {
+                    singletonObject = singletonFactory.getObject();
+                    this.earlySingletonObjects.put(beanName, singletonObject);
+                    this.singletonFactories.remove(beanName);
+                }
+            }
+        }
+    }
+    ```
+
+- **[返回上级方法](#doGetBean)**
+
+#### getObjectForBeanInstance
+- [ ] 完善
+
+#### getObjectForBeanInstance
+- [ ] 完善
+
+#### createBean
+&emsp;&emsp;创建 Bean 的实例，填充这个 Bean 实例，应用 Bean 后置处理器等
+
+- **RootBeanDefinition mbdToUse = mbd**
+    **获取 Bean定义**
+
+- **Class<?> resolvedClass = resolveBeanClass(mbd, beanName)**
+    **确保bean类在此时被实际解析，并在动态解析的类不能存储在共享合并bean定义中的情况下克隆bean定义**
+
+- **Object beanInstance = [doCreateBean](#doCreateBean)(beanName, mbdToUse, args)**
+
+- ****
+
+- **[返回上级方法](#doGetBean)**   
+
+#### doCreateBean
+&emsp;&emsp;实际创建指定的 Bean，此时已进行预创建处理，例如，检查 postProcessBeforeInstantiation 调用。区分默认 Bean 实例化、工厂方法的使用和自动连接构造函数
+
+- **BeanWrapper instanceWrapper = null**
+    
+    **实例化这个 Bean**
+
+- **instanceWrapper = [createBeanInstance](createBeanInstance)(beanName, mbd, args)**
+
+    ****
+
+- **[applyMergedBeanDefinitionPostProcessors](#applyMergedBeanDefinitionPostProcessors)(mbd, beanType, beanName)**  
+    **允许后置处理器修改合并 Bean 的定义**
+
+- **[populateBean](#populateBean)(beanName, mbd, instanceWrapper)**
+
+- 
+
+#### createBeanInstance
+&emsp;&emsp;为指定 Bean 创建新实例，**使用适当的实例化策略**：工厂方法，构造器或者简单实例化
+
+- **Class<?> beanClass = resolveBeanClass(mbd, beanName)**
+    **确定这个 Bean 的类能实际被解析**
+
+- **if (mbd.getFactoryMethodName() != null) {**  
+    &emsp;&emsp;**return [instantiateUsingFactoryMethod](#instantiateUsingFactoryMethod)(beanName, mbd, args);**  
+    **}**
+
+
+- **重新创建相同bean时的快捷方式**
+    ```java
+    boolean resolved = false;
+    boolean autowireNecessary = false;
+    if (args == null) {
+        synchronized (mbd.constructorArgumentLock) {
+            if (mbd.resolvedConstructorOrFactoryMethod != null){
+                resolved = true;
+                autowireNecessary = mbd.constructorArgumentsResolved;
+            }
+        }
+    }
+    if (resolved) {
+        if (autowireNecessary) {
+            return autowireConstructor(beanName, mbd, null, null);
+        }
+        else {
+            return instantiateBean(beanName, mbd);
+        }
+    }
+    ```
+-     
+
+#### instantiateUsingFactoryMethod
+&emsp;&emsp;
+
+#### applyMergedBeanDefinitionPostProcessors
+&emsp;&emsp;执行 MergedBeanDefinitionPostProcessor
+```java
+protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanType, String beanName) {
+    for (BeanPostProcessor bp : getBeanPostProcessors()) {
+        if (bp instanceof MergedBeanDefinitionPostProcessor) {
+            MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
+            bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+        }
+    }
+}
+```
