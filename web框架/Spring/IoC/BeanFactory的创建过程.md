@@ -4,8 +4,9 @@
 
     1. [applyMergedBeanDefinitionPostProcessors](#applyMergedBeanDefinitionPostProcessors)
 
-    2. []()
+    2. [InstantiationAwareBeanPostProcessor](#populateBean)
 
+    3. [wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName)](#initializeBean)
 
 
 2. 容器的概念，BeanFactory，ApplicationContext
@@ -373,7 +374,7 @@
 
 - **beanFactory.[preInstantiateSingletons](#preInstantiateSingletons)()**
 
-    **实例化所有的不是懒加载的单实例的 Bean**
+    **✨实例化所有的不是懒加载的单实例的 Bean，在此处实例化 Bean 完成 BeanFactory 的创建**
 
 #### preInstantiateSingletons
 &emsp;&emsp;确保所有的不是懒加载的单实例的 Bean 被实例化，也考虑 **[FactoryBean]()**，如果需要，通常在 BeanFactory 设置结束后调用此方法，如果有单实例 Bean 不能被创建则抛出 BeansException。  
@@ -398,9 +399,9 @@ void preInstantiateSingletons() throws BeansException;
     List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
     ```
 
-- **触发所有不是懒加载的单实例 Bean 的初始化**
+**触发所有不是懒加载的单实例 Bean 的初始化**
 
-    **遍历 beanNames，开始初始化 Bean**
+- **遍历 beanNames，开始初始化 Bean**
 
     - 判断是否是 FactoryBean，FactoryBean 与普通 Bean 的初始化稍有不同
 
@@ -408,7 +409,9 @@ void preInstantiateSingletons() throws BeansException;
 
     - **[getBean(beanName)](#getBean)** 普通 Bean 的创建 
 
-    **遍历 beanNames，获取单实例 Bean**
+- **遍历 beanNames，获取单实例 Bean**
+
+    - **对类型为 SmartInitializingSingleton 的 Bean 进行操作**
 
 - **[返回上级方法](#完成-BeanFactory-的初始化)**
 
@@ -466,11 +469,10 @@ public Object getBean(String name) throws BeansException {
       &emsp;&emsp;**}**       
       **});**  
       **bean = [getObjectForBeanInstance](#getObjectForBeanInstance)(sharedInstance, name,   beanName, mbd)**
-    - 
 
-- ****
+- 【返回 Bean】    
 
-
+- [返回上级方法](#getBean)
 
 #### getSingleton
 &emsp;&emsp;返回以给定的名称注册的单实例 Bean。检查 **已经实例化** 的单实例 Bean，也允许当前创建的单实例 Bean 的引用(解析循环引用)
@@ -479,7 +481,7 @@ public Object getBean(String name) throws BeansException {
 
     **从当前缓存中获取 Bean，如果不为 null，直接返回**
 
-- **如果 singletonObject 并且不在正在创建中**
+- **如果 singletonObject == null 并且不在正在创建中**
 
     ```java
     if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
@@ -497,10 +499,17 @@ public Object getBean(String name) throws BeansException {
     }
     ```
 
+- **singletonObject = singletonFactory.getObject()**
+
 - **[返回上级方法](#doGetBean)**
 
 #### getObjectForBeanInstance
-- [ ] 完善
+&emsp;&emsp;重写，以便隐式注册当前创建的bean，使其依赖于在 [supplier]() 回调
+
+- **判断是否正在创建**  
+    **String currentlyCreatedBean = this.currentlyCreatedBean.get()**
+
+- **super.getObjectForBeanInstance(beanInstance, name, beanName, mbd)**
 
 #### getObjectForBeanInstance
 - [ ] 完善
@@ -516,8 +525,6 @@ public Object getBean(String name) throws BeansException {
 
 - **Object beanInstance = [doCreateBean](#doCreateBean)(beanName, mbdToUse, args)**
 
-- ****
-
 - **[返回上级方法](#doGetBean)**   
 
 #### doCreateBean
@@ -527,7 +534,7 @@ public Object getBean(String name) throws BeansException {
     
     **实例化这个 Bean**
 
-- **instanceWrapper = [createBeanInstance](createBeanInstance)(beanName, mbd, args)**
+- **instanceWrapper = [createBeanInstance](#createBeanInstance)(beanName, mbd, args)**
 
     ****
 
@@ -535,8 +542,19 @@ public Object getBean(String name) throws BeansException {
     **允许后置处理器修改合并 Bean 的定义**
 
 - **[populateBean](#populateBean)(beanName, mbd, instanceWrapper)**
+    **填充 Bean，为 Bean赋值**
 
-- 
+- **exposedObject = [initializeBean](#initializeBean)(beanName, exposedObject, mbd)**
+
+- **Object earlySingletonReference = [getSingleton](#getSingleton)(beanName, false)**    
+
+    **从当前缓存中获取 Bean，如果不为 null，直接返回**
+
+- **registerDisposableBeanIfNecessary(beanName, bean, mbd)**  
+    **注册 Bean 销毁的方法**
+
+- [返回上级方法](#createBean)
+
 
 #### createBeanInstance
 &emsp;&emsp;为指定 Bean 创建新实例，**使用适当的实例化策略**：工厂方法，构造器或者简单实例化
@@ -587,3 +605,28 @@ protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, C
     }
 }
 ```
+
+#### populateBean
+&emsp;&emsp;用 Bean 定义中的属性值填充给定 BeanWrapper 中的 Bean 实例
+- **在这里执行了 InstantiationAwareBeanPostProcessor 中的方法**
+
+- **applyPropertyValues(beanName, mbd, bw, pvs)**
+    **给 Bean 赋值**
+
+- [返回上级函数](#doCreateBean)    
+
+#### initializeBean
+&emsp;&emsp;初始化指定的 Bean 实例，应用工厂回调以及 init 方法和后置处理器，调用 [createBean]() 定义 Bean，[initializeBean]() 返回存在的 bean 实例
+
+- **invokeAwareMethods(beanName, bean)**
+
+- **applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName)**  
+    **✨在初始化之前，调用各种 BeanPostProcessor 的 postProcessBeforeInitialization**
+
+- **invokeInitMethods**  
+    **调用 init 方法**
+
+- **applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName)**    
+    **✨在初始化之后，调用各种 BeanPostProcessor 的 postProcessAfterInitialization**
+
+- [返回上级函数](#doCreateBean)
