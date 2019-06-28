@@ -1,4 +1,4 @@
-## spring的IOC和AOP
+## spring的IoC和AOP
 
 
 ## sping如何实现（保证）事务一致性完整性，spring中事务传播机制类型
