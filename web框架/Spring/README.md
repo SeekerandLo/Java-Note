@@ -29,6 +29,14 @@
 
 ### AOP
 
+- 
+
+### 开启 Spring 注解扫描
+```xml
+<context:component-scan base-package="包名"/>
+```
+
+
 ### 动态代理
 
 ### Spring的优点
