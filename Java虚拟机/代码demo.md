@@ -1,4 +1,5 @@
-## 
+## 代码Demo
+
 - 
     ```java
     /**
@@ -66,7 +67,7 @@
     // 结果
     // test static
     // hello world
-    ```    
+    ```
     ```java
     // ✨将 str 加上 final 后
     class Test {
@@ -91,7 +92,7 @@
 
     // 这里指的是将常量放在 StaticClassTestFinal 的常量池中，之后
     // StaticClassTestFinal 与 Test 再无瓜葛，甚至可以将 Test 的 class 文件删除
-    ```    
+    ```
 
 - 
 ```java
@@ -115,7 +116,7 @@ public class FinalStaticClassTest {
 // 为什么在这个测试中输出了类的静态代码块？
 // 当一个常量的值在编译阶段不能确定时，这个常量不会被放到调用类的常量池中，
 // 这时在程序运行时，会导致主动使用这个类的常量所在的类，导致类的初始化
-```    
+```
 ***
 
 - 
@@ -171,5 +172,45 @@ public class InterfaceStaticTest {
 
 // 按如上代码测试，在第一次编译后删除编译结果文件中的 InterfaceTestParent.class
 // 再次运行会出现错误，ClassNotFoundException，因为 a 的结果是在程序运行时产生的
+```
+
+***
+
+- 关于反射
+
+```java
+// 使用 loadClass 加载类 不是对类的主动使用
+class ReflexClass {
+    static {
+        System.out.println("reflex static");
+    }
+}
+
+public class ReflexClassTest {
+    public static void main(String[] args) throws ClassNotFoundException {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        Class<?> clazz = classLoader.loadClass("com.liy.jvm.ReflexClass");
+        System.out.println(clazz);
+        System.out.println("---------------");
+        clazz = Class.forName("com.liy.jvm.ReflexClass");
+        System.out.println(clazz);
+    }
+}
+
+// 结果
+// class com.liy.jvm.ReflexClass
+// ---------------
+// reflex static
+// class com.liy.jvm.ReflexClass
+
+// 主动加载  利用反射的代码实例
+```
+
+***
+
+- 关于类加载器
+
+```java
+
 ```
 

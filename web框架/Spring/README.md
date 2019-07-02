@@ -31,11 +31,32 @@
 
 - 
 
+### 总结
+
+- Spring 容器在启动时会先保存注册进来的 Bean 的定义信息
+
+- Spring 会在合适的时候创建 Bean 
+    - 用到这个 Bean 的时候
+
+    - 统一创建剩下的所有 Bean 的时候，利用 getBean 创建 Bean；创建好后保存在容器中
+
+- 后置处理器 BeanPostProcessor
+
+    - 每个 Bean 创建完成后都会使用各种后置处理器进行处理，来增强 Bean 的功能
+        - AutowriedAnnotationBeanPostProcessor 自动注入
+
+        - AnnotaionAwareAspectJAutoProxyCreator 做 AOP 功能
+
+- 事件驱动模型
+    - ApplicationListener 事件监听
+
+    - ApplicationEventMulticaster 事件派发
+
+
 ### 开启 Spring 注解扫描
 ```xml
 <context:component-scan base-package="包名"/>
 ```
-
 
 ### 动态代理
 
