@@ -1,5 +1,7 @@
 ## JVM
 
+- Java 虚拟机是运行所有 Java 程序的抽象计算机，是 Java 的运行环境   
+
 ### JDK、JRE、JVM的关系
 - JDK > JRE > JVM
 

@@ -49,3 +49,5 @@
 ## synchronized 
 
 - 静态方法锁的是**类的 class 的对象**，普通方法锁的 **this 对象**
+
+- synchronized 是可重入锁
