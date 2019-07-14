@@ -30,3 +30,10 @@
     - @Primary 加在被注入的 Bean 上，当有相同类型的 Bean 时优先加载此类
 
     - @Qualifier 指明要加载的类的名字，当有多个相同类型的时候，可以使用它
+
+
+### BeanFactory 和 FactoryBean 的区别
+
+- BeanFactory 是一个接口，它是 Spring 创建的 Bean 的工厂，也就是 IoC 容器，Spring 使用它来管理创建的 Bean
+
+- FactoryBean 也是一个接口，它是创建 Bean 的方式，是一个能生产或者修饰对象生成的工厂 Bean，它的实现与设计模式中的工厂模式和修饰器模式类似，当使用它
