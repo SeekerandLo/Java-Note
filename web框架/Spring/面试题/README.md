@@ -32,6 +32,7 @@
 
     - @Qualifier 指明要加载的类的名字，当有多个相同类型的时候，可以使用它
 
+### Spring 中 Bean 的加载流程
 
 ### BeanFactory 和 FactoryBean 的区别
 `BeanFactory`、`FactoryBean`
