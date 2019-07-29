@@ -9,23 +9,25 @@
 
 ### 数据结构
 
-- [线性表：Java 中的实现类](https://github.com/SeekerandLo/Java-Note/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%80%A7%E8%A1%A8.md#%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8)
+## 小问题
 
-- [队列](https://github.com/SeekerandLo/Java-Note/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E9%98%9F%E5%88%97.md)
+1. 不使用第三个值，交换两个数。如 a = 10，b = 12，交换他们
+```java
+public void swap(){
+    int a = 10;
+    int b = 12;
 
-- [哈希：以HashMap为例](https://github.com/SeekerandLo/Java-Note/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E5%93%88%E5%B8%8C%E8%A1%A8.md)
+    int a = b-a; // 此时 a=2，b=12
+    int b = b-a; // 此时 b = 10
+    int a = b+a; 
+}
 
-- [栈：栈的多种实现方式](https://github.com/SeekerandLo/Java-Note/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%A0%88.md)
+public void swap2(){
+    int a = 10;
+    int b = 12;
 
-- [图]()
-
-- [串](https://github.com/SeekerandLo/Java-Note/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E4%B8%B2.md)
-
-- [堆]()
-
-- [树](https://github.com/SeekerandLo/Java-Note/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%A0%91.md)
-
-
-### 算法
-
-- [排序：经典排序代码](https://github.com/SeekerandLo/Java-Note/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F.md)
+    int a = b+a; // 此时 a = 22，
+    int b = a-b; // 此时 b = 10
+    int a = a-b; // 此时 a = 12   
+}
+```
