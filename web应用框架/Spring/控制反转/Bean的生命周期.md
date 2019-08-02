@@ -42,6 +42,8 @@ sharedInstance = getSingleton(beanName, () -> {
 
             - **执行 InstantiationAwareBeanPostProcessor 的 postProcessAfterInstantiation**
 
+            - **执行 InstantiationAwareBeanPostProcessor 的 postProcessProperties** **自动注入在这里**
+
             - **执行 InstantiationAwareBeanPostProcessor 的 postProcessPropertyValues**
 
             - applyPropertyValues(beanName, mbd, bw, pvs) **应用 PropertyValues**
@@ -59,6 +61,7 @@ sharedInstance = getSingleton(beanName, () -> {
         - registerDisposableBeanIfNecessary(beanName, bean, mbd) **注册销毁的方法**
 
 - 最后创建了一个单实例的 Bean
+
 
 
 ### 较详细的记录
@@ -223,6 +226,27 @@ sharedInstance = getSingleton(beanName, () -> {
     最后 return bean     
 
     - **完毕**
+
+
+### 注入一个 Bean 的过程
+
+- 使用的是 BeanPostProcessor 机制，在**填充 Bean 属性**的时候调用
+
+- 会查找这个 Bean 的 field，然后对每个 field 进行操作，查看它的注解，看注解中是否包含 AutoWired 注解
+
+    - 操作
+
+- 找到之后，开始注入，如果容器中还没有这个 Bean，就去创建，调用 getBean 一系列
+
+    - 注入是一个利用反射的过程，(目标对象中的属性)field.setField(bean, 要注入的对象)
+
+- 然后完毕
+
+### 如果 Bean 是一个 FactoryBean
+
+### 如果是配置类的话，一次加载的过程
+
+### 初始化容器的过程
 
 ### BeanFactory 中 Bean 的生命周期
 
