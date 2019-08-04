@@ -7,7 +7,12 @@
 
 &emsp;&emsp;第一次请求 WEB 服务器时，获取 JESSIONID，客户端应该将 JESSIONID 存放到 cookie 中，在以后的请求中携带它，服务器就能直到是谁在请求服务器
 
+
+### Session 和 Cookie 的区别
+
 - 
+
+
 ## 什么是 XSS 攻击，如何避免?
 
 &emsp;&emsp;XSS攻击通常指的是通过利用网页开发时留下的漏洞，通过巧妙的方法注入恶意指令代码到网页，使用户加载并执行攻击者恶意制造的网页程序。这些恶意网页程序通常是JavaScript，但实际上也可以包括Java、 VBScript、ActiveX、 Flash 或者甚至是普通的HTML。攻击成功后，攻击者可能得到包括但不限于更高的权限（如执行一些操作）、私密网页内容、会话和cookie等各种内容。
