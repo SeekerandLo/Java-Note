@@ -10,7 +10,9 @@
 
 ### Session 和 Cookie 的区别
 
-- 
+- session 存放在服务器端，没有数量限制。session 较安全。
+
+- cookie 存放在客户端，一个cookie最多存放 4KB 的数据。cookie 可能被破解。
 
 
 ## 什么是 XSS 攻击，如何避免?
