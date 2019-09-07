@@ -8,8 +8,8 @@
 
 ```java
 第一层：物理层
-第二层：数据链路层 802.2、802.3ATM、HDLC、FRAME RELAY 
-第三层：网络层 IP、IPX、APPLETALK、ICMP 
+第二层：数据链路层 802.2、802.3ATM、HDLC、FRAME RELAY、交换机 
+第三层：网络层 IP、IPX、APPLETALK、ICMP、路由器
 第四层：传输层 TCP、UDP、SPX 
 第五层：会话层 RPC、SQL、NFS 、X WINDOWS、ASP
 第六层：表示层 ASCLL、PICT、TIFF、JPEG、 MIDI、MPEG 
